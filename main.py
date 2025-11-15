@@ -160,10 +160,11 @@ class Coffee_order_builder:
             name: syrup name
         Returns:
             self for the call chain"""
-        syrups = self.__get_options_value("syrups")
-        if self.__default_values.get("limit").get("syrup") > len(syrups):
-            if name not in syrups:
-                self.__change_drink_option("syrups", (*syrups, name))
+        if type(name) == str:
+            syrups = self.__get_options_value("syrups")
+            if self.__default_values.get("limit").get("syrup") > len(syrups):
+                if name not in syrups:
+                    self.__change_drink_option("syrups", (*syrups, name))
         return self
 
     def set_sugar(self, teaspoons: int) -> "Coffee_order_builder":
@@ -172,8 +173,9 @@ class Coffee_order_builder:
             teaspoons: Number of teaspoons of sugar
         Returns:
             self for the call chain"""
-        if self.__default_values.get("limit").get("sugar") >= teaspoons:
-            self.__change_drink_option("sugar", teaspoons)
+        if type(teaspoons) == int:
+            if self.__default_values.get("limit").get("sugar") >= teaspoons:
+                self.__change_drink_option("sugar", teaspoons)
         return self
 
     def set_iced(self, iced: bool = True) -> "Coffee_order_builder":
@@ -182,7 +184,8 @@ class Coffee_order_builder:
             iced: True for a chilled drink
         Returns:
             self for the call chain"""
-        self.__change_drink_option("iced", iced)
+        if type(iced) == bool:
+            self.__change_drink_option("iced", iced)
         return self
 
     def clear_extras(self) -> "Coffee_order_builder":
@@ -222,6 +225,25 @@ def test_basic_coffee_creation():
     assert "small" in str(coffee1)
     assert "espresso" in str(coffee2)
     assert "small" in str(coffee2)
+
+
+def test_empty_base_error():
+    """Coffee with empty base"""
+    builder = Coffee_order_builder()
+    try:
+        builder.set_size("large").build()
+        assert False, "Should raise ValueError for empty base"
+    except ValueError as e:
+        assert "base" in str(e)
+
+def test_empty_size_error():
+    """Coffee with empty size"""
+    builder = Coffee_order_builder()
+    try:
+        builder.set_base("latte").build()
+        assert False, "Should raise ValueError for empty size"
+    except ValueError as e:
+        assert "size" in str(e)
 
 def test_coffee_with_milk():
     """Coffee with milk test"""
@@ -340,6 +362,8 @@ def test_price_calculation():
 
 if __name__ == "__main__":
     test_basic_coffee_creation()
+    test_empty_base_error()
+    test_empty_size_error()
     test_coffee_with_milk()
     test_coffee_with_syrups()
     test_coffee_with_sugar()
